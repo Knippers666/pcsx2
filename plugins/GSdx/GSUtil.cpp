@@ -203,16 +203,21 @@ bool GSUtil::HasCompatibleBits(uint32 spsm, uint32 dpsm)
 	return (s_maps.CompatibleBitsField[spsm][dpsm >> 5] & (1 << (dpsm & 0x1f))) != 0;
 }
 
+// Some GCC version want to put SSE/AVX optimization in CheckSSE.
+// To avoid an illegal intrustruction signal, let's just disable optimization here
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 bool GSUtil::CheckSSE()
 {
 	bool status = true;
 
 	struct ISA {
-		Xbyak::util::Cpu::Type type;
+		const Xbyak::util::Cpu::Type type;
 		const char* name;
 	};
 
-	ISA checks[] = {
+	const ISA checks[] = {
 		{Xbyak::util::Cpu::tSSE2, "SSE2"},
 #if _M_SSE >= 0x301
 		{Xbyak::util::Cpu::tSSSE3, "SSSE3"},
@@ -240,6 +245,8 @@ bool GSUtil::CheckSSE()
 
 	return status;
 }
+
+#pragma GCC pop_options
 
 #define OCL_PROGRAM_VERSION 3
 
